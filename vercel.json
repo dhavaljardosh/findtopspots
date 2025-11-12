@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "https://topspots.base44.app/home"
+    },
+    {
       "source": "/:path*",
       "destination": "https://topspots.base44.app/:path*"
     }
