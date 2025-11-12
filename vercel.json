@@ -1,0 +1,1 @@
+{ "rewrites": [ { "source": "/(.*)", "destination": "https://topspots.base44.app/$1" } ] }
