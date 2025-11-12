@@ -1,1 +1,8 @@
-{ "rewrites": [ { "source": "/(.*)", "destination": "https://topspot.app33.app/$1" } ] }
+{
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "https://topspots.base44.app/:path*"
+    }
+  ]
+}
