@@ -1,0 +1,1 @@
+echo '{ "rewrites": [ { "source": "/(.*)", "destination": "https://topspot.app33.app/$1" } ] }' > vercel.json
