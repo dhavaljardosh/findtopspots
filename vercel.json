@@ -1,1 +1,6 @@
-{ "rewrites": [ { "source": "/(.*)", "destination": "https://topspots.base44.app/$1" } ] }
+{
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter ui build",
+  "outputDirectory": "ui/.next",
+  "framework": "nextjs"
+}

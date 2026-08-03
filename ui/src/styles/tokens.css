@@ -1,0 +1,428 @@
+/**
+ * FindTopSpots — Design Tokens
+ * Single source of truth for all visual primitives.
+ * Consumed by globals.css and referenced directly in components.
+ *
+ * Naming convention:
+ *   --color-<scale>-<step>       raw palette
+ *   --color-<role>               semantic alias → points to a palette step
+ *   --font-<property>            typography
+ *   --spacing-<step>             spacing scale (4px base)
+ *   --radius-<size>              border radius
+ *   --shadow-<size>              elevation shadows
+ *   --transition-<speed>         motion timing
+ */
+
+:root {
+  /* ─────────────────────────────────────────────────────────────
+   * COLOR — Raw Palettes
+   * ───────────────────────────────────────────────────────────── */
+
+  /* Primary: Warm Amber/Orange — food & discovery energy */
+  --color-primary-50:  #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-300: #fcd34d;
+  --color-primary-400: #fbbf24;
+  --color-primary-500: #f59e0b;
+  --color-primary-600: #d97706;   /* primary action */
+  --color-primary-700: #b45309;
+  --color-primary-800: #92400e;
+  --color-primary-900: #78350f;
+  --color-primary-950: #451a03;
+
+  /* Neutral: Slate Gray — clean, modern, Linear-like */
+  --color-neutral-50:  #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+  --color-neutral-950: #020617;
+
+  /* ─────────────────────────────────────────────────────────────
+   * COLOR — Semantic: Surface
+   * ───────────────────────────────────────────────────────────── */
+
+  --color-background: #ffffff;           /* page background */
+  --color-surface-1:  #ffffff;           /* cards, panels */
+  --color-surface-2:  var(--color-neutral-50);  /* hover states, nested surfaces */
+  --color-surface-3:  var(--color-neutral-100); /* subtle dividers, input bg */
+  --color-border:     var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-300);
+
+  /* ─────────────────────────────────────────────────────────────
+   * COLOR — Semantic: Text
+   * ───────────────────────────────────────────────────────────── */
+
+  --color-text-primary:   var(--color-neutral-900);  /* headings, body */
+  --color-text-secondary: var(--color-neutral-600);  /* supporting text */
+  --color-text-muted:     var(--color-neutral-400);  /* placeholders, timestamps */
+  --color-text-inverse:   #ffffff;                   /* text on dark bg */
+  --color-text-link:      var(--color-primary-600);  /* links */
+  --color-text-link-hover: var(--color-primary-700);
+
+  /* ─────────────────────────────────────────────────────────────
+   * COLOR — Semantic: Feedback
+   * ───────────────────────────────────────────────────────────── */
+
+  --color-success:         #22c55e;  /* green-500 */
+  --color-success-light:   #dcfce7;  /* green-100 */
+  --color-success-dark:    #16a34a;  /* green-600 */
+
+  --color-warning:         #eab308;  /* yellow-500 */
+  --color-warning-light:   #fef9c3;  /* yellow-100 */
+  --color-warning-dark:    #ca8a04;  /* yellow-600 */
+
+  --color-error:           #ef4444;  /* red-500 */
+  --color-error-light:     #fee2e2;  /* red-100 */
+  --color-error-dark:      #dc2626;  /* red-600 */
+
+  --color-info:            #3b82f6;  /* blue-500 */
+  --color-info-light:      #dbeafe;  /* blue-100 */
+  --color-info-dark:       #2563eb;  /* blue-600 */
+
+  /* ─────────────────────────────────────────────────────────────
+   * COLOR — Primary Action Aliases
+   * ───────────────────────────────────────────────────────────── */
+
+  --color-action-bg:          var(--color-primary-600);
+  --color-action-bg-hover:    var(--color-primary-700);
+  --color-action-bg-active:   var(--color-primary-800);
+  --color-action-text:        #ffffff;
+  --color-action-ring:        var(--color-primary-400);
+
+  /* ─────────────────────────────────────────────────────────────
+   * TYPOGRAPHY — Font Families
+   * ───────────────────────────────────────────────────────────── */
+
+  --font-sans:  'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+                'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', 'Cascadia Code',
+                ui-monospace, 'Courier New', monospace;
+
+  /* ─────────────────────────────────────────────────────────────
+   * TYPOGRAPHY — Font Sizes
+   * ───────────────────────────────────────────────────────────── */
+
+  --font-size-xs:   0.75rem;    /* 12px */
+  --font-size-sm:   0.875rem;   /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg:   1.125rem;   /* 18px */
+  --font-size-xl:   1.25rem;    /* 20px */
+  --font-size-2xl:  1.5rem;     /* 24px */
+  --font-size-3xl:  1.875rem;   /* 30px */
+  --font-size-4xl:  2.25rem;    /* 36px */
+  --font-size-5xl:  3rem;       /* 48px */
+  --font-size-6xl:  3.75rem;    /* 60px */
+
+  /* ─────────────────────────────────────────────────────────────
+   * TYPOGRAPHY — Font Weights
+   * ───────────────────────────────────────────────────────────── */
+
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  --font-weight-extrabold: 800;
+
+  /* ─────────────────────────────────────────────────────────────
+   * TYPOGRAPHY — Line Heights
+   * ───────────────────────────────────────────────────────────── */
+
+  --line-height-none:     1;
+  --line-height-tight:    1.25;
+  --line-height-snug:     1.375;
+  --line-height-normal:   1.5;
+  --line-height-relaxed:  1.625;
+  --line-height-loose:    2;
+
+  /* ─────────────────────────────────────────────────────────────
+   * TYPOGRAPHY — Letter Spacing
+   * ───────────────────────────────────────────────────────────── */
+
+  --letter-spacing-tight:  -0.025em;
+  --letter-spacing-normal:  0em;
+  --letter-spacing-wide:    0.025em;
+  --letter-spacing-wider:   0.05em;
+  --letter-spacing-widest:  0.1em;
+
+  /* ─────────────────────────────────────────────────────────────
+   * SPACING — 4px Base Unit Scale
+   * ───────────────────────────────────────────────────────────── */
+
+  --spacing-0:    0px;
+  --spacing-0-5:  0.125rem;  /* 2px  */
+  --spacing-1:    0.25rem;   /* 4px  */
+  --spacing-1-5:  0.375rem;  /* 6px  */
+  --spacing-2:    0.5rem;    /* 8px  */
+  --spacing-2-5:  0.625rem;  /* 10px */
+  --spacing-3:    0.75rem;   /* 12px */
+  --spacing-3-5:  0.875rem;  /* 14px */
+  --spacing-4:    1rem;      /* 16px */
+  --spacing-5:    1.25rem;   /* 20px */
+  --spacing-6:    1.5rem;    /* 24px */
+  --spacing-7:    1.75rem;   /* 28px */
+  --spacing-8:    2rem;      /* 32px */
+  --spacing-9:    2.25rem;   /* 36px */
+  --spacing-10:   2.5rem;    /* 40px */
+  --spacing-11:   2.75rem;   /* 44px */
+  --spacing-12:   3rem;      /* 48px */
+  --spacing-14:   3.5rem;    /* 56px */
+  --spacing-16:   4rem;      /* 64px */
+  --spacing-20:   5rem;      /* 80px */
+  --spacing-24:   6rem;      /* 96px */
+  --spacing-28:   7rem;      /* 112px */
+  --spacing-32:   8rem;      /* 128px */
+  --spacing-36:   9rem;      /* 144px */
+  --spacing-40:   10rem;     /* 160px */
+  --spacing-48:   12rem;     /* 192px */
+  --spacing-56:   14rem;     /* 224px */
+  --spacing-64:   16rem;     /* 256px */
+  --spacing-72:   18rem;     /* 288px */
+  --spacing-80:   20rem;     /* 320px */
+  --spacing-96:   24rem;     /* 384px */
+
+  /* ─────────────────────────────────────────────────────────────
+   * BORDER RADIUS
+   * ───────────────────────────────────────────────────────────── */
+
+  --radius-none:  0px;
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    12px;
+  --radius-xl:    16px;
+  --radius-2xl:   24px;
+  --radius-3xl:   32px;
+  --radius-full:  9999px;
+
+  /* ─────────────────────────────────────────────────────────────
+   * SHADOWS — Subtle elevation system (warm-tinted umbra)
+   * ───────────────────────────────────────────────────────────── */
+
+  --shadow-xs:
+    0 1px 2px 0 rgb(0 0 0 / 0.04);
+
+  --shadow-sm:
+    0 1px 2px 0 rgb(0 0 0 / 0.04),
+    0 1px 3px 0 rgb(0 0 0 / 0.06);
+
+  --shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.07),
+    0 2px 4px -2px rgb(0 0 0 / 0.05);
+
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.08),
+    0 4px 6px -4px rgb(0 0 0 / 0.05);
+
+  --shadow-xl:
+    0 20px 25px -5px rgb(0 0 0 / 0.08),
+    0 8px 10px -6px rgb(0 0 0 / 0.04);
+
+  --shadow-2xl:
+    0 25px 50px -12px rgb(0 0 0 / 0.18);
+
+  --shadow-inner:
+    inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  --shadow-none: none;
+
+  /* Focus ring — used by interactive elements */
+  --shadow-focus:
+    0 0 0 3px var(--color-primary-200);
+
+  /* ─────────────────────────────────────────────────────────────
+   * Z-INDEX — Stacking context scale
+   * ───────────────────────────────────────────────────────────── */
+
+  --z-below:    -1;
+  --z-base:      0;
+  --z-raised:    10;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   300;
+  --z-modal:     400;
+  --z-toast:     500;
+  --z-tooltip:   600;
+
+  /* ─────────────────────────────────────────────────────────────
+   * TRANSITIONS — timing functions + durations
+   * ───────────────────────────────────────────────────────────── */
+
+  --ease-out:        cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in:         cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-in-out:     cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);  /* subtle overshoot */
+
+  --transition-fast:   150ms var(--ease-out);
+  --transition-base:   200ms var(--ease-out);
+  --transition-slow:   300ms var(--ease-out);
+  --transition-slower: 500ms var(--ease-out);
+
+  /* Common compound transitions */
+  --transition-colors:    color var(--transition-fast),
+                          background-color var(--transition-fast),
+                          border-color var(--transition-fast),
+                          fill var(--transition-fast);
+  --transition-transform: transform var(--transition-base);
+  --transition-shadow:    box-shadow var(--transition-base);
+  --transition-opacity:   opacity var(--transition-base);
+  --transition-all:       all var(--transition-base);
+
+  /* Card hover — the signature micro-interaction */
+  --transition-card-hover: transform var(--transition-base),
+                            box-shadow var(--transition-base);
+
+  /* ─────────────────────────────────────────────────────────────
+   * LAYOUT
+   * ───────────────────────────────────────────────────────────── */
+
+  --container-xs:   20rem;   /* 320px  */
+  --container-sm:   24rem;   /* 384px  */
+  --container-md:   28rem;   /* 448px  */
+  --container-lg:   32rem;   /* 512px  */
+  --container-xl:   36rem;   /* 576px  */
+  --container-2xl:  42rem;   /* 672px  */
+  --container-3xl:  48rem;   /* 768px  */
+  --container-4xl:  56rem;   /* 896px  */
+  --container-5xl:  64rem;   /* 1024px */
+  --container-6xl:  72rem;   /* 1152px */
+  --container-7xl:  80rem;   /* 1280px */
+
+  --navbar-height: 64px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * DARK MODE — Overrides
+ * All semantic tokens are remapped; raw palette tokens unchanged.
+ * ───────────────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Surfaces */
+    --color-background: var(--color-neutral-950);
+    --color-surface-1:  var(--color-neutral-900);
+    --color-surface-2:  var(--color-neutral-800);
+    --color-surface-3:  var(--color-neutral-700);
+    --color-border:     var(--color-neutral-800);
+    --color-border-strong: var(--color-neutral-700);
+
+    /* Text */
+    --color-text-primary:   var(--color-neutral-50);
+    --color-text-secondary: var(--color-neutral-400);
+    --color-text-muted:     var(--color-neutral-600);
+    --color-text-inverse:   var(--color-neutral-900);
+    --color-text-link:      var(--color-primary-400);
+    --color-text-link-hover: var(--color-primary-300);
+
+    /* Primary action — slightly lighter for dark bg legibility */
+    --color-action-bg:          var(--color-primary-500);
+    --color-action-bg-hover:    var(--color-primary-400);
+    --color-action-bg-active:   var(--color-primary-600);
+    --color-action-ring:        var(--color-primary-700);
+
+    /* Feedback — lighter tones for dark surfaces */
+    --color-success-light:   rgb(34 197 94 / 0.15);
+    --color-warning-light:   rgb(234 179 8 / 0.15);
+    --color-error-light:     rgb(239 68 68 / 0.15);
+    --color-info-light:      rgb(59 130 246 / 0.15);
+
+    /* Shadows — more pronounced on dark bg, cool-tinted */
+    --shadow-xs:
+      0 1px 2px 0 rgb(0 0 0 / 0.25);
+
+    --shadow-sm:
+      0 1px 2px 0 rgb(0 0 0 / 0.3),
+      0 1px 3px 0 rgb(0 0 0 / 0.35);
+
+    --shadow-md:
+      0 4px 6px -1px rgb(0 0 0 / 0.4),
+      0 2px 4px -2px rgb(0 0 0 / 0.3);
+
+    --shadow-lg:
+      0 10px 15px -3px rgb(0 0 0 / 0.45),
+      0 4px 6px -4px rgb(0 0 0 / 0.3);
+
+    --shadow-xl:
+      0 20px 25px -5px rgb(0 0 0 / 0.5),
+      0 8px 10px -6px rgb(0 0 0 / 0.3);
+
+    --shadow-2xl:
+      0 25px 50px -12px rgb(0 0 0 / 0.6);
+
+    --shadow-focus:
+      0 0 0 3px var(--color-primary-800);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * DATA-THEME — Explicit overrides (for ThemeProvider, no flash)
+ * Use [data-theme="dark"] on <html> to force dark regardless of OS.
+ * ───────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  --color-background: var(--color-neutral-950);
+  --color-surface-1:  var(--color-neutral-900);
+  --color-surface-2:  var(--color-neutral-800);
+  --color-surface-3:  var(--color-neutral-700);
+  --color-border:     var(--color-neutral-800);
+  --color-border-strong: var(--color-neutral-700);
+
+  --color-text-primary:   var(--color-neutral-50);
+  --color-text-secondary: var(--color-neutral-400);
+  --color-text-muted:     var(--color-neutral-600);
+  --color-text-inverse:   var(--color-neutral-900);
+  --color-text-link:      var(--color-primary-400);
+  --color-text-link-hover: var(--color-primary-300);
+
+  --color-action-bg:          var(--color-primary-500);
+  --color-action-bg-hover:    var(--color-primary-400);
+  --color-action-bg-active:   var(--color-primary-600);
+  --color-action-ring:        var(--color-primary-700);
+
+  --color-success-light:   rgb(34 197 94 / 0.15);
+  --color-warning-light:   rgb(234 179 8 / 0.15);
+  --color-error-light:     rgb(239 68 68 / 0.15);
+  --color-info-light:      rgb(59 130 246 / 0.15);
+
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.25);
+  --shadow-sm:  0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 0 rgb(0 0 0 / 0.35);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+  --shadow-focus: 0 0 0 3px var(--color-primary-800);
+}
+
+[data-theme="light"] {
+  --color-background: #ffffff;
+  --color-surface-1:  #ffffff;
+  --color-surface-2:  var(--color-neutral-50);
+  --color-surface-3:  var(--color-neutral-100);
+  --color-border:     var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-300);
+
+  --color-text-primary:   var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-muted:     var(--color-neutral-400);
+  --color-text-inverse:   #ffffff;
+  --color-text-link:      var(--color-primary-600);
+  --color-text-link-hover: var(--color-primary-700);
+
+  --color-action-bg:          var(--color-primary-600);
+  --color-action-bg-hover:    var(--color-primary-700);
+  --color-action-bg-active:   var(--color-primary-800);
+  --color-action-ring:        var(--color-primary-400);
+
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm:  0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.18);
+  --shadow-focus: 0 0 0 3px var(--color-primary-200);
+}
