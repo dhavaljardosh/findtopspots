@@ -201,8 +201,8 @@ export function GlobalSearch({ variant, defaultCity = 'Austin,TX' }: GlobalSearc
             }}
             placeholder={
               isHero
-                ? 'Search spots, restaurants, cafes...'
-                : 'Search...'
+                ? 'Search restaurants, cafes, parks, shops...'
+                : 'Search spots...'
             }
             aria-label="Search spots"
             aria-expanded={open}
@@ -271,12 +271,14 @@ export function GlobalSearch({ variant, defaultCity = 'Austin,TX' }: GlobalSearc
                       <p className="truncate text-xs text-gray-500">{spot.address}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      <span className="text-xs font-medium text-gray-600">
-                        {spot.avgRating.toFixed(1)} ★
-                      </span>
+                      {spot.voteCount > 0 && (
+                        <span className="text-xs font-semibold text-orange-500">
+                          🔥 {spot.voteCount}
+                        </span>
+                      )}
                       <span
                         className={cn(
-                          'rounded-full px-2 py-0.5 text-xs font-medium',
+                          'rounded-full px-2 py-0.5 text-xs font-medium capitalize',
                           CATEGORY_COLORS[spot.category] ?? 'bg-gray-100 text-gray-700',
                         )}
                       >
