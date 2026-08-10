@@ -161,6 +161,7 @@ placesRouter.get('/search', zValidator('query', SearchQuerySchema), async (c) =>
         ilike(spots.description, `%${q}%`),
         ilike(spots.address, `%${q}%`),
         sql`similarity(${spots.name}, ${q}) > 0.3`,
+        sql`similarity(replace(${spots.name}, ' ', ''), replace(${q}, ' ', '')) > 0.3`,
       )!,
     )
   }

@@ -184,6 +184,7 @@ spotsRouter.get("/", zValidator("query", SpotQuerySchema), async (c) => {
         ilike(spots.description, `%${q}%`),
         ilike(spots.address, `%${q}%`),
         sql`similarity(${spots.name}, ${q}) > 0.3`,
+        sql`similarity(replace(${spots.name}, ' ', ''), replace(${q}, ' ', '')) > 0.3`,
       )!,
     );
   }
@@ -203,7 +204,7 @@ spotsRouter.get("/", zValidator("query", SpotQuerySchema), async (c) => {
   const rows = await db.query.spots.findMany({
     where: (_, { and }) => and(...conditions),
     orderBy: q
-      ? [desc(sql`similarity(${spots.name}, ${q})`), ...orderBy]
+      ? [desc(sql`GREATEST(similarity(${spots.name}, ${q}), similarity(replace(${spots.name}, ' ', ''), replace(${q}, ' ', '')))`), ...orderBy]
       : orderBy,
     limit: limit + 1,
   });
