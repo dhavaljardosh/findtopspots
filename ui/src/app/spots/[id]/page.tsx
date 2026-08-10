@@ -1,13 +1,17 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import Link from 'next/link'
+import { MapPin, ExternalLink, BadgeCheck, Building2, Star, Eye, Phone, Globe, Clock, DollarSign, ChevronDown } from 'lucide-react'
 import { auth } from '@clerk/nextjs/server'
 import { getSpot, getSpotReviews } from '@/lib/api'
-import { StarRating } from '@/components/spots/StarRating'
 import { ReviewCard } from '@/components/spots/ReviewCard'
 import { AddReviewForm } from '@/components/spots/AddReviewForm'
-import { formatRating, formatReviewCount } from '@/lib/utils'
-
-export const experimental_ppr = true
+import { VoteButton } from '@/components/spots/VoteButton'
+import { TrackView } from '@/components/spots/TrackView'
+import { SpotLiveDataInline } from '@/components/spots/SpotLiveDataInline'
+import { formatRating, formatReviewCount, cn } from '@/lib/utils'
+import { getTagDef, getTagStyle } from '@/lib/tags'
+import { EmojiIcon } from '@/components/ui/EmojiIcon'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -19,172 +23,234 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const spot = await getSpot(id)
     return {
       title: `${spot.name} — FindTopSpots`,
-      description: spot.description.slice(0, 155),
+      description: spot.description?.slice(0, 155),
     }
   } catch {
-    return {
-      title: 'Spot — FindTopSpots',
-    }
+    return { title: 'Spot — FindTopSpots' }
   }
 }
 
-async function SpotReviews({ spotId }: { spotId: string }) {
-  const reviews = await getSpotReviews(spotId)
+const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  restaurant: { bg: 'bg-rose-500/20',    text: 'text-rose-100',    label: 'Restaurant' },
+  cafe:        { bg: 'bg-amber-500/20',  text: 'text-amber-100',  label: 'Cafe' },
+  bar:         { bg: 'bg-violet-500/20', text: 'text-violet-100', label: 'Bar' },
+  park:        { bg: 'bg-emerald-500/20',text: 'text-emerald-100',label: 'Park' },
+  gym:         { bg: 'bg-blue-500/20',   text: 'text-blue-100',   label: 'Gym' },
+  shop:        { bg: 'bg-pink-500/20',   text: 'text-pink-100',   label: 'Shop' },
+  attraction:  { bg: 'bg-orange-500/20', text: 'text-orange-100', label: 'Attraction' },
+  other:       { bg: 'bg-white/20',      text: 'text-white/90',   label: 'Other' },
+}
 
+async function SpotReviews({ spotId, currentUserId }: { spotId: string; currentUserId?: string }) {
+  const reviews = await getSpotReviews(spotId)
   if (reviews.length === 0) {
     return (
-      <p className="text-gray-500 py-4">
-        No reviews yet. Be the first to write one!
+      <p className="py-8 text-center text-sm text-[var(--color-text-muted)]">
+        No reviews yet — be the first!
       </p>
     )
   }
-
   return (
     <div className="space-y-4">
       {reviews.map((review) => (
-        <ReviewCard key={review.id} review={review} />
+        <ReviewCard
+          key={review.id}
+          review={review as Parameters<typeof ReviewCard>[0]['review']}
+          {...(currentUserId !== undefined ? { currentUserId } : {})}
+        />
       ))}
     </div>
   )
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  restaurant: 'Restaurant',
-  cafe: 'Cafe',
-  bar: 'Bar',
-  park: 'Park',
-  gym: 'Gym',
-  shop: 'Shop',
-  attraction: 'Attraction',
-  other: 'Other',
-}
-
-const CATEGORY_COLORS: Record<string, string> = {
-  restaurant: 'bg-red-100 text-red-700',
-  cafe: 'bg-amber-100 text-amber-700',
-  bar: 'bg-purple-100 text-purple-700',
-  park: 'bg-green-100 text-green-700',
-  gym: 'bg-blue-100 text-blue-700',
-  shop: 'bg-pink-100 text-pink-700',
-  attraction: 'bg-orange-100 text-orange-700',
-  other: 'bg-gray-100 text-gray-700',
-}
-
 export default async function SpotDetailPage({ params }: Props) {
   const { id } = await params
-  const { userId } = await auth()
-  const spot = await getSpot(id)
+  const { userId, getToken } = await auth()
+  const token = userId ? await getToken() : null
+  const spot = await getSpot(id, token ?? undefined)
 
-  const isOwner = false // We'd need to compare userId with spot.createdBy via DB lookup
-  const canReview = Boolean(userId) && !isOwner
+  const canReview = Boolean(userId)
+  const cat = CATEGORY_STYLES[spot.category] ?? CATEGORY_STYLES.other!
+
+  const allPhotos = [
+    ...(spot.coverPhotoUrl ? [spot.coverPhotoUrl] : []),
+    ...(spot.photos?.map((p) => p.url).filter((u) => u !== spot.coverPhotoUrl) ?? []),
+  ]
+  const heroPhoto = allPhotos[0] ?? null
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-4xl font-bold text-gray-900">{spot.name}</h1>
-          <span
-            className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${CATEGORY_COLORS[spot.category] ?? 'bg-gray-100 text-gray-700'}`}
-          >
-            {CATEGORY_LABELS[spot.category] ?? spot.category}
+    <div className="mx-auto max-w-3xl">
+      <TrackView
+        id={spot.id}
+        name={spot.name}
+        coverPhotoUrl={spot.coverPhotoUrl ?? null}
+        category={spot.category}
+        avgRating={spot.avgRating}
+        address={spot.address}
+      />
+
+      {/* ── Hero ── */}
+      <div className="relative -mx-4 sm:-mx-6 lg:-mx-8 h-80 sm:h-96 overflow-hidden bg-[var(--color-surface-3)]">
+        {heroPhoto ? (
+          <img
+            src={heroPhoto}
+            alt={spot.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <MapPin className="h-16 w-16 text-[var(--color-text-muted)] opacity-20" />
+          </div>
+        )}
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+        {/* Category badge — top left */}
+        <div className="absolute top-4 left-4">
+          <span className={cn('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm', cat.bg, cat.text)}>
+            {cat.label}
           </span>
+          {spot.isVerifiedBusiness && (
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-100 backdrop-blur-sm">
+              <BadgeCheck className="h-3 w-3" />
+              Verified
+            </span>
+          )}
         </div>
 
-        <p className="text-gray-500 text-sm flex items-center gap-1">
-          <svg
-            className="h-4 w-4 flex-shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
-            />
-          </svg>
-          {spot.address}
-        </p>
+        {/* Vote — top right, floating */}
+        <div className="absolute top-4 right-4">
+          <VoteButton spotId={spot.id} initialCount={spot.voteCount ?? 0} {...(spot.userVoted !== undefined ? { initialVoted: spot.userVoted } : {})} size="md" />
+        </div>
 
-        <div className="flex items-center gap-3">
-          <StarRating rating={spot.avgRating} size="md" />
-          <span className="text-lg font-semibold text-gray-900">
-            {formatRating(spot.avgRating)}
-          </span>
-          <span className="text-gray-500 text-sm">
-            {formatReviewCount(spot.reviewCount)}
-          </span>
+        {/* Name + address overlaid at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+          <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl drop-shadow-lg">
+            {spot.name}
+          </h1>
+          <a
+            href={`https://www.google.com/maps?q=${spot.lat},${spot.lng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors"
+          >
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            {spot.address}
+            <ExternalLink className="h-3 w-3 opacity-60" />
+          </a>
         </div>
       </div>
 
-      {/* Description */}
-      {spot.description && (
-        <div className="prose prose-gray max-w-none">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">About</h2>
-          <p className="text-gray-700 leading-relaxed">{spot.description}</p>
+      {/* ── Stats bar ── */}
+      <div className="flex flex-wrap items-center gap-4 border-b border-[var(--color-border)] py-4">
+        <div className="flex items-center gap-1.5">
+          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+          <span className="text-base font-bold text-[var(--color-text-primary)]">{formatRating(spot.avgRating)}</span>
+          <span className="text-sm text-[var(--color-text-muted)]">{formatReviewCount(spot.reviewCount)}</span>
         </div>
+        {(spot.viewCount ?? 0) > 0 && (
+          <div className="flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
+            <Eye className="h-3.5 w-3.5" />
+            {(spot.viewCount ?? 0).toLocaleString()} views
+          </div>
+        )}
+        {spot.isVerifiedBusiness && (
+          <span className="ml-auto flex items-center gap-1 text-xs font-medium text-emerald-600">
+            <BadgeCheck className="h-3.5 w-3.5" />
+            Verified business
+          </span>
+        )}
+      </div>
+
+      {/* ── Live info (open now, hours, price, Google rating) ── */}
+      <SpotLiveDataInline spotId={id} />
+
+      {/* ── About ── */}
+      {spot.description && spot.description.length > 0 && (
+        <section className="border-b border-[var(--color-border)] py-6 space-y-2">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)]">About</h2>
+          <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">{spot.description}</p>
+        </section>
       )}
 
-      {/* Tags */}
+      {/* ── Tags ── */}
       {spot.tags && spot.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {spot.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
+        <section className="border-b border-[var(--color-border)] py-6">
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Tags</h2>
+          <div className="flex flex-wrap gap-2">
+            {spot.tags.map((tag) => {
+              const def = getTagDef(tag)
+              const style = getTagStyle(tag)
+              return (
+                <Link
+                  key={tag}
+                  href={`/spots?tag=${encodeURIComponent(tag)}`}
+                  className={cn('inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors hover:opacity-80', style.bg, style.text)}
+                >
+                  {def?.emoji && <EmojiIcon emoji={def.emoji} size={14} />}
+                  {def?.label ?? tag}
+                </Link>
+              )
+            })}
+          </div>
+        </section>
       )}
 
-      {/* Reviews */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Reviews</h2>
-        </div>
+      {/* ── Reviews ── */}
+      <section className="py-6 space-y-5">
+        <h2 className="text-lg font-bold text-[var(--color-text-primary)]">
+          Reviews
+          {spot.reviewCount > 0 && (
+            <span className="ml-2 text-sm font-normal text-[var(--color-text-muted)]">({spot.reviewCount})</span>
+          )}
+        </h2>
 
         {canReview && (
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Write a Review
-            </h3>
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-1)] p-5">
+            <h3 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">Write a Review</h3>
             <AddReviewForm spotId={id} />
           </div>
         )}
 
         {!userId && (
-          <p className="text-sm text-gray-500">
-            <a href="/sign-in" className="text-blue-600 hover:underline">
-              Sign in
-            </a>{' '}
-            to write a review.
+          <p className="text-sm text-[var(--color-text-muted)]">
+            <Link href="/sign-in" className="font-medium text-amber-500 hover:text-amber-400 transition-colors">Sign in</Link>
+            {' '}to write a review.
           </p>
         )}
 
-        <Suspense
-          fallback={
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-28 animate-pulse rounded-xl bg-gray-100"
-                />
-              ))}
-            </div>
-          }
-        >
-          <SpotReviews spotId={id} />
+        <Suspense fallback={
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-28 animate-pulse rounded-2xl bg-[var(--color-surface-2)]" />
+            ))}
+          </div>
+        }>
+          <SpotReviews spotId={id} {...(spot.dbUserId ? { currentUserId: spot.dbUserId } : {})} />
         </Suspense>
       </section>
+
+      {/* ── Business claim CTA ── */}
+      {!spot.isVerifiedBusiness && (
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-1)] p-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/10">
+              <Building2 className="h-5 w-5 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-text-primary)]">Is this your business?</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Claim it to respond to reviews and manage your listing.</p>
+            </div>
+          </div>
+          <Link
+            href={`/spots/${spot.id}/claim`}
+            className="shrink-0 rounded-xl border border-amber-400 px-4 py-2 text-sm font-semibold text-amber-600 hover:bg-amber-400 hover:text-amber-950 transition-colors"
+          >
+            Claim listing
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

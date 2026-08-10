@@ -2,36 +2,35 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from '@clerk/nextjs'
-import { MapPin, Plus } from 'lucide-react'
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { Building2, Compass, Plus, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GlobalSearch } from '@/components/search/GlobalSearch'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/spots', label: 'Browse Spots' },
+  { href: '/spots', label: 'Explore' },
 ]
 
 export function Navbar() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-background)]/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-lg font-bold text-blue-600 hover:text-blue-700 transition-colors"
+          className="flex shrink-0 items-center gap-2 font-bold text-[var(--color-text-primary)] hover:opacity-80 transition-opacity"
         >
-          <MapPin className="h-5 w-5" />
-          <span>FindTopSpots</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400">
+            <Compass className="h-4.5 w-4.5 text-amber-950" />
+          </div>
+          <span className="hidden text-base tracking-tight sm:block">FindTopSpots</span>
         </Link>
 
         {/* Nav links */}
-        <nav className="hidden sm:flex items-center gap-1">
+        <nav className="hidden items-center gap-0.5 sm:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
@@ -39,8 +38,8 @@ export function Navbar() {
               className={cn(
                 'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 pathname === href
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                  ? 'bg-[var(--color-surface-2)] text-[var(--color-text-primary)]'
+                  : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-primary)]',
               )}
             >
               {label}
@@ -48,47 +47,79 @@ export function Navbar() {
           ))}
         </nav>
 
+        {/* Search — grows to fill space */}
+        <div className="min-w-0 flex-1 md:max-w-xs lg:max-w-sm">
+          <GlobalSearch variant="navbar" />
+        </div>
+
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2">
           <SignedIn>
             <Link
+              href="/dashboard"
+              className={cn(
+                'hidden sm:inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                pathname === '/dashboard'
+                  ? 'bg-[var(--color-surface-2)] text-[var(--color-text-primary)]'
+                  : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-primary)]',
+              )}
+            >
+              <Building2 className="h-4 w-4" />
+              My Business
+            </Link>
+
+            <Link
               href="/spots/new"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-sm font-semibold text-amber-950 shadow-sm hover:bg-amber-300 active:bg-amber-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
             >
               <Plus className="h-4 w-4" />
-              <span>Add Spot</span>
+              <span className="hidden sm:inline">Add Spot</span>
             </Link>
+
+            <Link
+              href="/settings"
+              className={cn(
+                'rounded-lg p-2 transition-colors',
+                pathname === '/settings'
+                  ? 'bg-[var(--color-surface-2)] text-[var(--color-text-primary)]'
+                  : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-primary)]',
+              )}
+              aria-label="Settings"
+            >
+              <Settings className="h-4.5 w-4.5" />
+            </Link>
+
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
 
           <SignedOut>
             <Link
               href="/sign-in"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-primary)] transition-colors"
             >
-              Sign In
+              Sign in
             </Link>
             <Link
               href="/sign-up"
-              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="rounded-xl bg-amber-400 px-3.5 py-2 text-sm font-semibold text-amber-950 hover:bg-amber-300 transition-colors"
             >
-              Sign Up
+              Sign up
             </Link>
           </SignedOut>
         </div>
       </div>
 
-      {/* Mobile nav */}
-      <nav className="flex sm:hidden border-t border-gray-100 px-4 py-2 gap-1">
+      {/* Mobile bottom nav */}
+      <nav className="flex sm:hidden border-t border-[var(--color-border)] px-4 py-1.5 gap-1">
         {NAV_LINKS.map(({ href, label }) => (
           <Link
             key={href}
             href={href}
             className={cn(
-              'flex-1 rounded-lg px-3 py-2 text-center text-sm font-medium transition-colors',
+              'flex-1 rounded-lg px-3 py-2 text-center text-xs font-medium transition-colors',
               pathname === href
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-600 hover:bg-gray-100',
+                ? 'bg-[var(--color-surface-2)] text-[var(--color-text-primary)]'
+                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)]',
             )}
           >
             {label}
