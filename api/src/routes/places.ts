@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
-import { ilike, or, desc, lt, and, inArray, type SQL } from 'drizzle-orm'
+import { ilike, or, desc, lt, and, inArray, sql, type SQL } from 'drizzle-orm'
 import { db } from '../db'
 import { spots, spotPhotos } from '../db/schema'
 import { SpotCategorySchema } from '@fts/types'
@@ -160,6 +160,7 @@ placesRouter.get('/search', zValidator('query', SearchQuerySchema), async (c) =>
         ilike(spots.name, `%${q}%`),
         ilike(spots.description, `%${q}%`),
         ilike(spots.address, `%${q}%`),
+        sql`similarity(${spots.name}, ${q}) > 0.15`,
       )!,
     )
   }
