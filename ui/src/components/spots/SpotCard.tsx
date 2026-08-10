@@ -1,7 +1,13 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { MapPin, Star } from 'lucide-react'
+import { Eye, MapPin, Star } from 'lucide-react'
+
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`
+  return String(n)
+}
 import type { Spot } from '@fts/types'
 import { PhotoCarousel } from './PhotoCarousel'
 import { VoteButton } from './VoteButton'
@@ -102,23 +108,20 @@ export function SpotCard({ spot }: SpotCardProps) {
           </div>
         )}
 
-        {/* Rating + vote */}
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <div className="flex items-center gap-1.5">
-            {hasRating ? (
-              <>
+        {/* Stats + vote */}
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {hasRating && (
+              <span className="flex items-center gap-1 shrink-0">
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                <span className="text-sm font-bold text-[var(--color-text-primary)]">
-                  {rating.toFixed(1)}
-                </span>
-                {spot.reviewCount > 0 && (
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    ({spot.reviewCount})
-                  </span>
-                )}
-              </>
-            ) : (
-              <span className="text-xs text-[var(--color-text-muted)]">No reviews yet</span>
+                <span className="text-sm font-bold text-[var(--color-text-primary)]">{rating.toFixed(1)}</span>
+              </span>
+            )}
+            {(spot.viewCount ?? 0) > 0 && (
+              <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] shrink-0">
+                <Eye className="h-3 w-3" />
+                {fmtCount(spot.viewCount ?? 0)}
+              </span>
             )}
           </div>
           <VoteButton spotId={spot.id} initialCount={spot.voteCount ?? 0} size="sm" />

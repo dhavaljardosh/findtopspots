@@ -1,6 +1,12 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { ArrowRight, MapPin } from 'lucide-react'
+import { ArrowRight, Eye, MapPin } from 'lucide-react'
+
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`
+  return String(n)
+}
 import { getSpots } from '@/lib/api'
 import type { Spot } from '@fts/types'
 import { SpotCard } from '@/components/spots/SpotCard'
@@ -38,19 +44,37 @@ function VoteCard({ spot }: { spot: SpotWithPhotos }) {
             <MapPin className="h-8 w-8 text-[var(--color-text-muted)] opacity-20" />
           </div>
         )}
-        {/* Vote count badge — overlaid top-right on photo */}
-        {(spot.voteCount ?? 0) > 0 && (
-          <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 backdrop-blur-sm">
-            <img src="https://openmoji.org/data/color/svg/1F525.svg" alt="🔥" width={13} height={13} />
-            <span className="text-xs font-bold text-white">{spot.voteCount}</span>
-          </div>
-        )}
+        {/* Stats overlay — top-right on photo */}
+        <div className="absolute top-2 right-2 flex items-center gap-1.5">
+          {(spot.viewCount ?? 0) > 0 && (
+            <div className="flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 backdrop-blur-sm">
+              <Eye className="h-3 w-3 text-white/80" />
+              <span className="text-[11px] font-semibold text-white/90">{fmtCount(spot.viewCount ?? 0)}</span>
+            </div>
+          )}
+          {(spot.voteCount ?? 0) > 0 && (
+            <div className="flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 backdrop-blur-sm">
+              <img src="https://openmoji.org/data/color/svg/1F525.svg" alt="🔥" width={13} height={13} />
+              <span className="text-xs font-bold text-white">{spot.voteCount}</span>
+            </div>
+          )}
+        </div>
       </div>
       <div className="p-3 space-y-1.5">
         <p className="text-sm font-semibold text-[var(--color-text-primary)] line-clamp-1 group-hover:text-amber-500 transition-colors">{spot.name}</p>
         <p className="text-[11px] text-[var(--color-text-muted)] truncate">{spot.address.split(',').slice(0, 2).join(',')}</p>
         <div className="flex items-center justify-between pt-0.5">
-          <span className="text-[11px] text-[var(--color-text-muted)]">★ {spot.avgRating.toFixed(1)}</span>
+          <div className="flex items-center gap-2">
+            {spot.avgRating > 0 && (
+              <span className="text-[11px] text-[var(--color-text-muted)]">★ {spot.avgRating.toFixed(1)}</span>
+            )}
+            {(spot.viewCount ?? 0) > 0 && (
+              <span className="flex items-center gap-0.5 text-[11px] text-[var(--color-text-muted)]">
+                <Eye className="h-3 w-3" />
+                {fmtCount(spot.viewCount ?? 0)}
+              </span>
+            )}
+          </div>
           <VoteButton spotId={spot.id} initialCount={spot.voteCount ?? 0} size="sm" />
         </div>
       </div>
