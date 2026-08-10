@@ -1,3 +1,5 @@
 export * from './user'
 export * from './spot'
 export * from './review'
+export * from './claim'
+export * from './comment'

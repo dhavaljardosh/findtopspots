@@ -179,16 +179,17 @@ export default function HomePage() {
             <span className="text-amber-500">worth going to</span>
           </h1>
 
-          <div className="mx-auto mt-6 max-w-lg">
+          <div className="mx-auto mt-6 max-w-lg" data-testid="hero-search">
             <GlobalSearch variant="hero" defaultCity="Austin,TX" />
           </div>
 
           {/* Category quick-links */}
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <div className="mt-5 flex flex-wrap justify-center gap-2" data-testid="category-quicklinks">
             {QUICK_CATS.map(({ emoji, label, cat }) => (
               <Link
                 key={cat}
                 href={`/spots?category=${cat}`}
+                data-testid={`category-link-${cat}`}
                 className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3.5 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:border-amber-400/50 hover:bg-amber-400/5 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
               >
                 <EmojiIcon emoji={emoji} size={15} />

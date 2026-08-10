@@ -53,6 +53,7 @@ export function VoteButton({ spotId, initialCount, initialVoted = false, size = 
   if (size === 'md') {
     return (
       <button
+        data-testid="vote-button"
         onClick={(e) => void toggle(e)}
         disabled={loading}
         title={voted ? 'Remove vote' : 'Upvote this spot'}
@@ -82,6 +83,7 @@ export function VoteButton({ spotId, initialCount, initialVoted = false, size = 
   // sm size (for cards)
   return (
     <button
+      data-testid="vote-button"
       onClick={(e) => void toggle(e)}
       disabled={loading}
       title={voted ? 'Remove vote' : 'Upvote'}

@@ -108,7 +108,7 @@ export default async function SpotDetailPage({ params }: Props) {
 
         {/* Category badge — top left */}
         <div className="absolute top-4 left-4">
-          <span className={cn('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm', cat.bg, cat.text)}>
+          <span data-testid="spot-category" className={cn('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm', cat.bg, cat.text)}>
             {cat.label}
           </span>
           {spot.isVerifiedBusiness && (
@@ -120,7 +120,7 @@ export default async function SpotDetailPage({ params }: Props) {
         </div>
 
         {/* Vote — top right, floating */}
-        <div className="absolute top-4 right-4">
+        <div data-testid="vote-button-wrapper" className="absolute top-4 right-4">
           <VoteButton spotId={spot.id} initialCount={spot.voteCount ?? 0} {...(spot.userVoted !== undefined ? { initialVoted: spot.userVoted } : {})} size="md" />
         </div>
 
@@ -130,6 +130,7 @@ export default async function SpotDetailPage({ params }: Props) {
             {spot.name}
           </h1>
           <a
+            data-testid="spot-address"
             href={`https://www.google.com/maps?q=${spot.lat},${spot.lng}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -143,14 +144,14 @@ export default async function SpotDetailPage({ params }: Props) {
       </div>
 
       {/* ── Stats bar ── */}
-      <div className="flex flex-wrap items-center gap-4 border-b border-[var(--color-border)] py-4">
+      <div data-testid="stats-bar" className="flex flex-wrap items-center gap-4 border-b border-[var(--color-border)] py-4">
         <div className="flex items-center gap-1.5">
           <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-          <span className="text-base font-bold text-[var(--color-text-primary)]">{formatRating(spot.avgRating)}</span>
-          <span className="text-sm text-[var(--color-text-muted)]">{formatReviewCount(spot.reviewCount)}</span>
+          <span data-testid="spot-avg-rating" className="text-base font-bold text-[var(--color-text-primary)]">{formatRating(spot.avgRating)}</span>
+          <span data-testid="spot-review-count" className="text-sm text-[var(--color-text-muted)]">{formatReviewCount(spot.reviewCount)}</span>
         </div>
         {(spot.viewCount ?? 0) > 0 && (
-          <div className="flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
+          <div data-testid="spot-view-count" className="flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
             <Eye className="h-3.5 w-3.5" />
             {(spot.viewCount ?? 0).toLocaleString()} views
           </div>
@@ -198,7 +199,7 @@ export default async function SpotDetailPage({ params }: Props) {
       )}
 
       {/* ── Reviews ── */}
-      <section className="py-6 space-y-5">
+      <section data-testid="reviews-section" className="py-6 space-y-5">
         <h2 className="text-lg font-bold text-[var(--color-text-primary)]">
           Reviews
           {spot.reviewCount > 0 && (
@@ -233,7 +234,7 @@ export default async function SpotDetailPage({ params }: Props) {
 
       {/* ── Business claim CTA ── */}
       {!spot.isVerifiedBusiness && (
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-1)] p-5 flex items-center justify-between gap-4">
+        <div data-testid="claim-banner" className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-1)] p-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/10">
               <Building2 className="h-5 w-5 text-amber-500" />

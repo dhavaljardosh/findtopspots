@@ -1,146 +1,114 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * E2E — Write Review flow (authenticated)
+ * E2E — Review section flows
  *
- * Covers:
- *   - Unauthenticated user cannot see / submit the review form
- *   - Review form renders on a spot detail page for authenticated users
- *   - Rating selector and body textarea are present
- *   - Submitting a valid review shows it in the list and updates avgRating
- *   - Submitting a duplicate review shows an error (409)
- *   - Body validation: minimum 10 characters
+ * Prerequisites:
+ *   - Next.js dev server running at http://localhost:3000
+ *   - API server running at http://localhost:3001 with seed data
  *
- * Auth-gated tests are skipped until Clerk test mode / storageState is set up.
- * See auth-flows.spec.ts for setup instructions.
+ * Auth strategy: no Clerk mocking. We only test unauthenticated states
+ * (sign-in prompt visible, review form absent) and structural presence of the
+ * reviews section. Authenticated-only submission tests are scaffolded but
+ * skipped until Clerk test mode is configured.
  */
 
-// A known-good spot UUID from seed data with at least 0 reviews.
-const SEEDED_SPOT_ID = process.env.E2E_SEEDED_SPOT_ID ?? '00000000-0000-0000-0000-000000000001'
+/** Navigate to /spots, click first card and return to the detail page. */
+async function goToFirstSpotDetail(page: import('@playwright/test').Page) {
+  await page.goto('/spots')
+  const firstCard = page.locator('[data-testid="spot-card"]').first()
+  await expect(firstCard).toBeVisible({ timeout: 15_000 })
+  await firstCard.click()
+  await expect(page).toHaveURL(/\/spots\/[0-9a-f-]{36}/, { timeout: 10_000 })
+}
+
+// ─── Unauthenticated ──────────────────────────────────────────────────────────
 
 test.describe('Reviews — unauthenticated', () => {
-  test('P0 — review form / write-review button is not shown to unauthenticated users', async ({ page }) => {
-    await page.goto(`/spots/${SEEDED_SPOT_ID}`)
+  // P0 — review form is NOT shown; a sign-in link appears instead
+  test('P0 — write-review form is absent; sign-in prompt shown instead', async ({ page }) => {
+    await goToFirstSpotDetail(page)
+    const reviewsSection = page.locator('[data-testid="reviews-section"]')
+    await expect(reviewsSection).toBeVisible({ timeout: 10_000 })
 
-    // The review form should be absent; a sign-in prompt may be shown instead
-    const reviewForm = page.locator('[data-testid="review-form"]')
-    const writeReviewBtn = page.getByRole('button', { name: /write a review|leave a review/i })
+    // The AddReviewForm wrapper ("Write a Review" heading inside a card) should be absent
+    await expect(reviewsSection.getByText(/write a review/i)).not.toBeVisible()
 
-    await expect(reviewForm.or(writeReviewBtn)).not.toBeVisible()
+    // A sign-in link should be present instead
+    await expect(reviewsSection.getByRole('link', { name: /sign in/i })).toBeVisible()
+  })
+
+  // P0 — reviews section heading is always present
+  test('P0 — reviews section heading is always rendered', async ({ page }) => {
+    await goToFirstSpotDetail(page)
+    const reviewsSection = page.locator('[data-testid="reviews-section"]')
+    await expect(reviewsSection.getByRole('heading', { name: /reviews/i })).toBeVisible({ timeout: 10_000 })
+  })
+
+  // P1 — reviews list OR empty-state message is shown (never a blank section)
+  test('P1 — reviews list or empty-state message is shown', async ({ page }) => {
+    await goToFirstSpotDetail(page)
+    const reviewsSection = page.locator('[data-testid="reviews-section"]')
+    await expect(reviewsSection).toBeVisible({ timeout: 10_000 })
+
+    const existingReview = reviewsSection.locator('article, [data-testid="review-card"]').first()
+    const emptyMsg = reviewsSection.getByText(/no reviews yet/i)
+
+    // One of these should be present after the Suspense resolves
+    await expect(existingReview.or(emptyMsg)).toBeVisible({ timeout: 12_000 })
+  })
+
+  // P1 — clicking sign-in link in review section goes to /sign-in
+  test('P1 — sign-in link in reviews section navigates to sign-in page', async ({ page }) => {
+    await goToFirstSpotDetail(page)
+    const reviewsSection = page.locator('[data-testid="reviews-section"]')
+    const signInLink = reviewsSection.getByRole('link', { name: /sign in/i })
+    await expect(signInLink).toBeVisible({ timeout: 10_000 })
+    const href = await signInLink.getAttribute('href')
+    expect(href).toMatch(/sign-in/)
   })
 })
 
-test.describe('Reviews — authenticated', () => {
-  // Restore Clerk session before each test in this group.
+// ─── Authenticated (skipped until Clerk test mode is configured) ───────────────
+
+test.describe('Reviews — authenticated (Clerk test mode required)', () => {
+  /**
+   * To enable these tests:
+   * 1. Set CLERK_TEST_MODE=true in the Clerk dashboard.
+   * 2. Generate a saved auth state: npx playwright codegen --save-storage=.auth/user.json
+   * 3. Uncomment: test.use({ storageState: '.auth/user.json' })
+   * 4. Remove test.skip() calls.
+   */
+
   // test.use({ storageState: '.auth/user.json' })
 
-  test.skip('P0 — review form is shown on the spot detail page for authenticated users', async ({ page }) => {
-    await page.goto(`/spots/${SEEDED_SPOT_ID}`)
-
-    const trigger = page
-      .getByRole('button', { name: /write a review|leave a review/i })
-      .or(page.locator('[data-testid="review-form"]'))
-
-    await expect(trigger).toBeVisible({ timeout: 8_000 })
+  test.skip('P0 — review form is shown for authenticated user', async ({ page }) => {
+    await goToFirstSpotDetail(page)
+    const reviewsSection = page.locator('[data-testid="reviews-section"]')
+    await expect(reviewsSection.getByText(/write a review/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('textarea')).toBeVisible()
   })
 
-  test.skip('P0 — user can submit a review and it appears in the reviews list', async ({ page }) => {
-    await page.goto(`/spots/${SEEDED_SPOT_ID}`)
+  test.skip('P0 — authenticated user can submit a review and it appears in the list', async ({ page }) => {
+    await goToFirstSpotDetail(page)
+    const reviewsSection = page.locator('[data-testid="reviews-section"]')
 
-    // Open the review form if it is behind a button
-    const writeBtn = page.getByRole('button', { name: /write a review|leave a review/i })
-    if (await writeBtn.isVisible()) {
-      await writeBtn.click()
-    }
+    const uniqueText = `E2E automated review at ${Date.now()}. This place is excellent!`
+    await reviewsSection.locator('textarea').fill(uniqueText)
 
-    // Select a rating — 5 stars
-    const starFive = page
-      .getByLabel(/5 stars?/i)
-      .or(page.locator('[data-testid="star-5"]'))
-    await expect(starFive).toBeVisible({ timeout: 6_000 })
+    // Select 5-star rating
+    const starFive = reviewsSection.getByLabel(/5 stars?/i).or(reviewsSection.locator('[data-testid="star-5"]'))
     await starFive.click()
 
-    // Fill in the review body
-    const uniqueReviewText = `E2E automated review submitted at ${Date.now()}. This place was wonderful!`
-    const bodyField = page
-      .getByLabel(/review body|your review|write your review/i)
-      .or(page.getByPlaceholder(/share your experience/i))
-      .or(page.locator('textarea'))
-    await bodyField.fill(uniqueReviewText)
-
-    await page.getByRole('button', { name: /submit review|post review|submit/i }).click()
-
-    // The new review should appear in the list
-    await expect(page.getByText(uniqueReviewText)).toBeVisible({ timeout: 10_000 })
+    await reviewsSection.getByRole('button', { name: /submit/i }).click()
+    await expect(page.getByText(uniqueText)).toBeVisible({ timeout: 12_000 })
   })
 
-  test.skip('P0 — submitting a duplicate review shows a conflict error', async ({ page }) => {
-    // This test assumes the authenticated test user has already submitted a review
-    // for SEEDED_SPOT_ID (e.g., from a previous run or seed data).
-    await page.goto(`/spots/${SEEDED_SPOT_ID}`)
-
-    const writeBtn = page.getByRole('button', { name: /write a review|leave a review/i })
-    if (await writeBtn.isVisible()) {
-      await writeBtn.click()
-    }
-
-    const bodyField = page
-      .getByLabel(/review body|your review/i)
-      .or(page.getByPlaceholder(/share your experience/i))
-      .or(page.locator('textarea'))
-    await bodyField.fill('Trying to post a duplicate review for this great spot.')
-
-    const starFour = page.getByLabel(/4 stars?/i).or(page.locator('[data-testid="star-4"]'))
-    if (await starFour.isVisible()) await starFour.click()
-
-    await page.getByRole('button', { name: /submit review|post review|submit/i }).click()
-
-    // An error toast or inline error should be shown
-    await expect(
-      page.getByText(/already reviewed|you have already|duplicate|409/i),
-    ).toBeVisible({ timeout: 8_000 })
-  })
-
-  test.skip('P0 — submitting a review updates the spot avgRating display', async ({ page }) => {
-    await page.goto(`/spots/${SEEDED_SPOT_ID}`)
-
-    const ratingBefore = await page.locator('[data-testid="spot-avg-rating"]').textContent()
-
-    const writeBtn = page.getByRole('button', { name: /write a review|leave a review/i })
-    if (await writeBtn.isVisible()) await writeBtn.click()
-
-    const starFive = page.getByLabel(/5 stars?/i).or(page.locator('[data-testid="star-5"]'))
-    await starFive.click()
-
-    const bodyField = page
-      .getByLabel(/review body|your review/i)
-      .or(page.locator('textarea'))
-    await bodyField.fill('Updating the spot rating with this stellar E2E review, cannot wait to return!')
-
-    await page.getByRole('button', { name: /submit review|post review|submit/i }).click()
-
-    // After submission, the avgRating should reflect the new value (or at least still be visible)
-    await expect(page.locator('[data-testid="spot-avg-rating"]')).toBeVisible({ timeout: 10_000 })
-    const ratingAfter = await page.locator('[data-testid="spot-avg-rating"]').textContent()
-    // Rating must have been rendered (may or may not differ depending on existing reviews)
-    expect(ratingAfter).not.toBeNull()
-    expect(ratingAfter).toBeTruthy()
-  })
-
-  test.skip('P1 — review body shorter than 10 characters shows inline validation error', async ({ page }) => {
-    await page.goto(`/spots/${SEEDED_SPOT_ID}`)
-
-    const writeBtn = page.getByRole('button', { name: /write a review|leave a review/i })
-    if (await writeBtn.isVisible()) await writeBtn.click()
-
-    const starThree = page.getByLabel(/3 stars?/i).or(page.locator('[data-testid="star-3"]'))
-    if (await starThree.isVisible()) await starThree.click()
-
-    const bodyField = page.locator('textarea').first()
-    await bodyField.fill('Short')
-
-    await page.getByRole('button', { name: /submit review|post review|submit/i }).click()
-
-    await expect(page.getByText(/at least 10 characters|review too short/i)).toBeVisible()
+  test.skip('P1 — review body shorter than 10 characters shows validation error', async ({ page }) => {
+    await goToFirstSpotDetail(page)
+    const textarea = page.locator('textarea').first()
+    await textarea.fill('Short')
+    await page.getByRole('button', { name: /submit/i }).click()
+    await expect(page.getByText(/at least 10 characters|too short/i)).toBeVisible()
   })
 })

@@ -44,6 +44,7 @@ export function SpotCard({ spot }: SpotCardProps) {
 
   return (
     <article
+      data-testid="spot-card"
       onClick={() => router.push(`/spots/${spot.id}`)}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-1)] shadow-[var(--shadow-sm)] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-strong)]"
     >
@@ -76,7 +77,7 @@ export function SpotCard({ spot }: SpotCardProps) {
       {/* Content */}
       <div className="flex flex-1 flex-col gap-2 p-4">
         {/* Name */}
-        <h3 className="text-sm font-semibold leading-snug text-[var(--color-text-primary)] line-clamp-1 group-hover:text-amber-500 transition-colors">
+        <h3 data-testid="spot-card-name" className="text-sm font-semibold leading-snug text-[var(--color-text-primary)] line-clamp-1 group-hover:text-amber-500 transition-colors">
           {spot.name}
         </h3>
 

@@ -26,19 +26,34 @@ export const SpotSchema = CreateSpotSchema.extend({
   createdBy: z.string().uuid(),
   avgRating: z.number().min(0).max(5),
   reviewCount: z.number().int().nonnegative(),
+  voteCount: z.number().int().nonnegative().optional().default(0),
+  viewCount: z.number().int().nonnegative().optional().default(0),
+  coverPhotoUrl: z.string().url().nullable().optional(),
+  isVerifiedBusiness: z.boolean().optional().default(false),
+  status: z.string().optional().default('live'),
+  googlePlaceId: z.string().optional().nullable(),
+  foursquareId: z.string().optional().nullable(),
+  photos: z.array(z.object({ id: z.string(), url: z.string() })).optional(),
+  tags: z.array(z.string()).optional(),
   createdAt: z.string(),
+  // Fields returned when authed
+  userVoted: z.boolean().optional(),
+  dbUserId: z.string().nullable().optional(),
 })
 
 export const UpdateSpotSchema = CreateSpotSchema.partial()
 
 export const SpotQuerySchema = z.object({
   q: z.string().optional(),
+  city: z.string().optional(),
+  tag: z.string().optional(),
   lat: z.coerce.number().optional(),
   lng: z.coerce.number().optional(),
   radiusKm: z.coerce.number().max(100).default(10).optional(),
   category: SpotCategorySchema.optional(),
   limit: z.coerce.number().max(100).default(20),
   cursor: z.string().optional(),
+  sort: z.enum(['top', 'recent', 'new']).optional(),
 })
 
 export type SpotCategory = z.infer<typeof SpotCategorySchema>
